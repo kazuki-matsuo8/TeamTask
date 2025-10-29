@@ -5,8 +5,8 @@ import {
   Heading,
   Input,
   VStack,
+  Text,
 } from "@chakra-ui/react";
-import { Alert } from "@chakra-ui/alert";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FormControl, FormLabel } from "@chakra-ui/form-control";
@@ -68,7 +68,11 @@ const Login = () => {
               ログイン
             </Heading>
 
-            {error && <Alert status="error">{error}</Alert>}
+            {error && (
+              <Text color="red" w="full">
+                {error}
+              </Text>
+            )}
 
             <FormControl isRequired width="100%">
               <FormLabel>メールアドレス</FormLabel>

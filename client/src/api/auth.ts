@@ -5,7 +5,7 @@ type LoginResponse = {
   user: User;
 };
 
-export const signUp = async (userData: SignUpData) => {
+export const signUp = async (userData: SignUpData): Promise<LoginResponse> => {
     try {
         const response = await fetch("http://127.0.0.1:3000/api/v1/users", {
             method: "POST",
@@ -25,7 +25,7 @@ export const signUp = async (userData: SignUpData) => {
             const errorData = await response.json();
             throw new Error(errorData.message || '登録に失敗しました');
         }
-        const data = await response.json();
+        const data: LoginResponse = await response.json();
         return data;
     } catch (error) {
         console.error('API呼び出しエラー:', error);

@@ -7,8 +7,8 @@ import {
   Input,
   Heading,
   VStack,
+  Text,
 } from "@chakra-ui/react";
-import { Alert } from "@chakra-ui/alert";
 import { FormControl, FormLabel } from "@chakra-ui/form-control";
 import { signUp } from "../api/auth";
 import type { SignUpData } from "../types";
@@ -79,14 +79,14 @@ const SignUp = () => {
               新規登録
             </Heading>
 
-            {error && <Alert status="error" color="red.500">{error}</Alert>}
+            {error && (
+              <Text color="red" w="full">
+                {error}
+              </Text>
+            )}
 
             <FormControl isRequired width="100%">
-              <FormLabel
-                requiredIndicator={<span style={{ color: "red.500" }}>*</span>}
-              >
-                名前
-              </FormLabel>
+              <FormLabel>名前</FormLabel>
               <Input
                 type="text"
                 value={name}
@@ -98,11 +98,7 @@ const SignUp = () => {
               />
             </FormControl>
             <FormControl isRequired width="100%">
-              <FormLabel
-                requiredIndicator={<span style={{ color: "red.500" }}>*</span>}
-              >
-                メールアドレス
-              </FormLabel>
+              <FormLabel>メールアドレス</FormLabel>
               <Input
                 type="email"
                 value={email}
@@ -114,11 +110,7 @@ const SignUp = () => {
               />
             </FormControl>
             <FormControl isRequired width="100%">
-              <FormLabel
-                requiredIndicator={<span style={{ color: "red.500" }}>*</span>}
-              >
-                パスワード
-              </FormLabel>
+              <FormLabel>パスワード</FormLabel>
               <Input
                 type="password"
                 value={password}
@@ -130,11 +122,7 @@ const SignUp = () => {
               />
             </FormControl>
             <FormControl isRequired width="100%">
-              <FormLabel
-                requiredIndicator={<span style={{ color: "red.500" }}>*</span>}
-              >
-                パスワード（確認用）
-              </FormLabel>
+              <FormLabel>パスワード（確認用）</FormLabel>
               <Input
                 type="password"
                 value={passwordConfirmation}

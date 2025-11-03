@@ -1,4 +1,5 @@
 class Api::V1::UsersController < ApplicationController
+  before_action :authenticate, only: [:index]
   def create
     @user = User.new(user_params)
     if @user.save
@@ -8,6 +9,11 @@ class Api::V1::UsersController < ApplicationController
     else
       render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
     end
+  end
+
+  def index
+    @users = User.all
+    render json: @users, except: [:password_digest]
   end
 
   private

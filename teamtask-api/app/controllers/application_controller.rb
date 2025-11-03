@@ -1,8 +1,8 @@
 class ApplicationController < ActionController::API
   # ユーザーIDを受け取り、JWT（認証トークン）を生成して返すメソッド
   def create_token(user_id)
-    # トークンに含める情報（ペイロード）を設定。ユーザーIDと有効期限（14日後）を含める
-    payload = { user_id: user_id, exp: (DateTime.current + 14.days).to_i }
+    # トークンに含める情報（ペイロード）を設定。ユーザーIDと有効期限（12時間後）を含める
+    payload = { user_id: user_id, exp: (DateTime.current + 12.hours).to_i }
     # トークンの署名に使う、アプリケーション固有の秘密鍵を取得
     secret_key = Rails.application.credentials.secret_key_base
     # payloadと秘密鍵を使って、JWTを生成（エンコード）

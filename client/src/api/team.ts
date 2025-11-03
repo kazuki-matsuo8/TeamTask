@@ -1,4 +1,4 @@
-import type { TeamData, Team } from '../types';
+import type { TeamData, Team, User } from '../types';
 
 export const createTeam = async (teamData: TeamData): Promise<Team> => {
   const token = localStorage.getItem("token");
@@ -24,6 +24,38 @@ export const createTeam = async (teamData: TeamData): Promise<Team> => {
     }
 
     const data: Team = await response.json();
+    return data;
+
+  } catch (error) {
+    console.error('API呼び出しエラー:', error);
+    throw error;
+  }
+};
+
+export const inviteUserToTeam = async (teamId: string, userId: number): Promise<User> => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("認証トークンが見つかりません。ログインしてください。");
+  }
+
+  try {
+    const response = await fetch(`http://127.0.0.1:3000/api/v1/teams/${teamId}/members`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ user_id: userId }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const message = errorData.errors.join("\n");
+      throw new Error(message || '招待に失敗しました');
+    }
+
+    const data: User = await response.json();
     return data;
 
   } catch (error) {

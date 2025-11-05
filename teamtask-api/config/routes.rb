@@ -5,6 +5,7 @@ Rails.application.routes.draw do
       resources :teams, only: [:create, :show] do
         # /api/v1/teams/:team_id/members
         resources :members, only: [:create, :index]
+        resources :tasks, only: [:index, :create, :update, :destroy]
       end
       post '/login', to: 'authentication#create'
     end

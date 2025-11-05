@@ -11,6 +11,7 @@ import {
   DrawerOverlay,
   DrawerContent,
   DrawerCloseButton,
+  VStack,
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 import type { User } from "../types";
@@ -21,12 +22,20 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   teamId: string;
+  currentMembers: User[];
 };
 
-const InviteMemberDrawer: React.FC<Props> = ({ isOpen, onClose, teamId }) => {
+const InviteMemberDrawer: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  teamId,
+  currentMembers,
+}) => {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const memberIds: number[] = currentMembers.map((member) => member.id);
 
   useEffect(() => {
     if (isOpen) {
@@ -82,34 +91,47 @@ const InviteMemberDrawer: React.FC<Props> = ({ isOpen, onClose, teamId }) => {
           </Box>
 
           {loading ? (
-            <Box textAlign="center">
-              <Spinner />
-            </Box>
+            <Spinner />
           ) : (
-            <Box maxH="60vh" overflowY="auto">
-              {filteredUsers.map((user) => (
-                <Box
-                  key={user.id}
-                  w="100%"
-                  p={2}
-                  mb={2}
-                  borderWidth={1}
-                  borderRadius="md"
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Text>{user.name}</Text>
-                  <Button
-                    size="sm"
-                    colorScheme="blue"
-                    onClick={() => handleInvite(user.id)}
+            <VStack align="start" spacing={1} overflowY="auto">
+              {filteredUsers.map((user) => {
+                const isAlreadyMember = memberIds.includes(user.id);
+
+                return (
+                  <Box
+                    key={user.id}
+                    w="full"
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    p={3}
+                    borderRadius="md"
+                    _hover={{ bg: "gray.50" }}
                   >
-                    招待
-                  </Button>
-                </Box>
-              ))}
-            </Box>
+                    <Box>
+                      <Text fontWeight="bold">{user.name}</Text>
+                      <Text fontSize="sm" color="gray.500">
+                        {user.email}
+                      </Text>
+                    </Box>
+
+                    {isAlreadyMember ? (
+                      <Text fontSize="sm" color="gray.500">
+                        参加済み
+                      </Text>
+                    ) : (
+                      <Button
+                        size="sm"
+                        colorScheme="blue"
+                        onClick={() => handleInvite(user.id)}
+                      >
+                        招待
+                      </Button>
+                    )}
+                  </Box>
+                );
+              })}
+            </VStack>
           )}
         </DrawerBody>
       </DrawerContent>

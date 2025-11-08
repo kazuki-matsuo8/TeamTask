@@ -31,7 +31,7 @@ export type Team = {
   updated_at: string;
 };
 
-// Railsのenumと値を一致させる（0: todo, 1: inprogress, 2: done）
+// Railsのenumと値を一致させる
 export type TaskStatus = "todo" | "inprogress" | "done";
 
 export type Task = {

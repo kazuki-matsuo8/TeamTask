@@ -7,6 +7,6 @@ class Task < ApplicationRecord
 
   enum :status, { todo: 0, inprogress: 1, done: 2 }
 
-  has_many :task_assignments
+  has_many :task_assignments, dependent: :destroy
   has_many :users, through: :task_assignments
 end

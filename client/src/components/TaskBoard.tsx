@@ -10,8 +10,9 @@ import {
   SimpleGrid,
 } from "@chakra-ui/react";
 import { getTasks } from "../api/task";
-import type { Task, TaskStatus, User } from "../types";
-import CreateTaskModal from "./CreateTaskModal"; 
+import type { Task, User } from "../types";
+import CreateTaskModal from "./CreateTaskModal";
+import TaskDetailsModal from "./TaskDetailsModal";
 
 type TaskWithUser = Task & { users: User[] | null };
 
@@ -24,15 +25,25 @@ const TaskBoard: React.FC<Props> = ({ teamId, members }) => {
   const [tasks, setTasks] = useState<TaskWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const {
+    isOpen: isCreateModalOpen,
+    onOpen: onCreateModalOpen,
+    onClose: onCreateModalClose,
+  } = useDisclosure();
+  const {
+    isOpen: isDetailsModalOpen,
+    onOpen: onDetailsModalOpen,
+    onClose: onDetailsModalClose,
+  } = useDisclosure();
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedTask, setSelectedTask] = useState<TaskWithUser | null>(null);
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
         setLoading(true);
-        const tasksData = await getTasks(teamId); // ⬅️ TaskWithUser[] が返ってくる
-        setTasks(tasksData); // ⬅️ そのままセット
+        const tasksData = await getTasks(teamId); 
+        setTasks(tasksData); 
       } catch (e) {
         if (e instanceof Error) setError(e.message);
       } finally {
@@ -41,19 +52,34 @@ const TaskBoard: React.FC<Props> = ({ teamId, members }) => {
     };
     fetchTasks();
   }, [teamId]);
-  
-  const filterTasksByStatus = (
-    status: TaskStatus
-  ): (Task & { users: User[] | null })[] => {
-    return tasks.filter((task) => task.status === status);
+
+  const getApiStatus = (displayStatus: string): Task["status"] => {
+    const reverseMap: Record<string, Task["status"]> = {
+      未着手: "todo",
+      進行中: "inprogress",
+      完了: "done",
+    };
+    return reverseMap[displayStatus] || "todo";
   };
 
-  const todoTasks = filterTasksByStatus("todo");
-  const inprogressTasks = filterTasksByStatus("inprogress");
-  const doneTasks = filterTasksByStatus("done");
+  const filterTasksByStatus = (
+    displayStatus: "未着手" | "進行中" | "完了"
+  ): TaskWithUser[] => {
+    const apiStatus = getApiStatus(displayStatus);
+    return tasks.filter((task) => task.status === apiStatus);
+  };
+
+  const todoTasks = filterTasksByStatus("未着手");
+  const inprogressTasks = filterTasksByStatus("進行中");
+  const doneTasks = filterTasksByStatus("完了");
 
   const handleTaskCreated = (newTask: TaskWithUser) => {
-    setTasks(prevTasks => [...prevTasks, newTask]); 
+    setTasks((prevTasks) => [...prevTasks, newTask]);
+  };
+
+  const handleTaskClick = (task: TaskWithUser) => {
+    setSelectedTask(task);
+    onDetailsModalOpen();
   };
 
   if (loading) return <Spinner size="xl" />;
@@ -62,23 +88,43 @@ const TaskBoard: React.FC<Props> = ({ teamId, members }) => {
   return (
     <Box>
       <Box mb={6}>
-        <Button colorScheme="green" onClick={onOpen}>
+        <Button colorScheme="green" onClick={onCreateModalOpen}>
           ＋ 新しいタスクを追加
         </Button>
       </Box>
 
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-        <TaskColumn title="未着手" tasks={todoTasks} />
-        <TaskColumn title="作業中" tasks={inprogressTasks} />
-        <TaskColumn title="完了" tasks={doneTasks} />
+        <TaskColumn
+          title="未着手"
+          tasks={todoTasks}
+          onTaskClick={handleTaskClick}
+        />
+        <TaskColumn
+          title="作業中"
+          tasks={inprogressTasks}
+          onTaskClick={handleTaskClick}
+        />
+        <TaskColumn
+          title="完了"
+          tasks={doneTasks}
+          onTaskClick={handleTaskClick}
+        />
       </SimpleGrid>
 
       <CreateTaskModal
-        isOpen={isOpen}
-        onClose={onClose}
+        isOpen={isCreateModalOpen}
+        onClose={onCreateModalClose}
         teamId={teamId}
         members={members}
-        onCreateSuccess={handleTaskCreated} 
+        onCreateSuccess={handleTaskCreated}
+      />
+      <TaskDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={onDetailsModalClose}
+        task={selectedTask}
+        teamId={teamId}
+        members={members}
+        onTaskListUpdated={setTasks}
       />
     </Box>
   );
@@ -88,9 +134,14 @@ const TaskBoard: React.FC<Props> = ({ teamId, members }) => {
 type TaskColumnProps = {
   title: string;
   tasks: TaskWithUser[];
+  onTaskClick: (task: TaskWithUser) => void;
 };
 
-const TaskColumn: React.FC<TaskColumnProps> = ({ title, tasks }) => {
+const TaskColumn: React.FC<TaskColumnProps> = ({
+  title,
+  tasks,
+  onTaskClick,
+}) => {
   return (
     <Box bg="gray.100" p={4} borderRadius="md" w="100%" minH="500px">
       <Heading size="md" mb={4}>
@@ -105,10 +156,16 @@ const TaskColumn: React.FC<TaskColumnProps> = ({ title, tasks }) => {
             borderRadius="md"
             w="full"
             boxShadow="sm"
+            onClick={() => onTaskClick(task)}
+            cursor="pointer"
+            _hover={{ bg: "gray.50" }}
           >
             <Text fontWeight="bold">{task.title}</Text>
             <Text fontSize="sm" color="gray.500">
-              担当: {task.users && task.users.length > 0 ? task.users.map(u => u.name).join(', ') : '未割り当て'}
+              担当:{" "}
+              {task.users && task.users.length > 0
+                ? task.users.map((u) => u.name).join(", ")
+                : "未割り当て"}
             </Text>
           </Box>
         ))}

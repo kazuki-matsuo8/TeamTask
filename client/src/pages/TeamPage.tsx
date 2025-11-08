@@ -16,6 +16,7 @@ import {
 import InviteMemberDrawer from "../components/InviteMemberDrawer";
 import type { Team, User } from "../types";
 import { getTeam, getTeamMembers } from "../api/team";
+import TaskBoard from "../components/TaskBoard";
 
 const TeamPage = () => {
   const { teamId } = useParams<{ teamId: string }>();
@@ -101,7 +102,7 @@ const TeamPage = () => {
           <TabPanels>
             <TabPanel>
               <Box p={4}>
-                <p>ここにタスク一覧のコンポーネント</p>
+                <TaskBoard teamId={teamId!} members={members} />
               </Box>
             </TabPanel>
             <TabPanel>

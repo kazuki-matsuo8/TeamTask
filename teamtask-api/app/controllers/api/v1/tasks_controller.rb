@@ -5,41 +5,69 @@ class Api::V1::TasksController < ApplicationController
   before_action :set_task, only: [:update, :destroy]
 
   def index
-    @tasks = @team.tasks.includes(:user)
-    render json: @tasks, include: :user
+    @tasks = @team.tasks.includes(:users)
+    render json: @tasks.as_json(include: :users), status: :ok
   end
 
   def create
-    user_id = params[:task][:user_id]
+    user_ids = params[:task][:user_ids]
 
-    unless @team.users.exists?(id: user_id)
-      render json: { errors: ["有効な担当者（チームメンバー）を指定してください"] }, status: :unprocessable_entity
+    unless valid_team_member_assignment?(user_ids)
       return
     end
 
     @task = @team.tasks.build(task_params.merge(status: :todo))
     
     if @task.save
-      render json: @task, status: :created
+      @task.users = User.where(id: user_ids)
+      render json: @task.as_json(include: :users), status: :created
     else
       render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def update
+    if params[:task].key?(:user_ids)
+      unless valid_team_member_assignment?(params[:task][:user_ids])
+        return
+      end
+    end
+
     if @task.update(task_params)
-      render json: @task
+      render json: @task.as_json(include: :users), status: :ok
     else
       render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def destroy
-    @task.destroy
-    head :no_content
+    if @task.destroy
+      head :no_content
+    else
+      render json: { errors: ["タスクの削除に失敗しました"] }, status: :unprocessable_entity
+    end
   end
 
   private
+
+  def valid_team_member_assignment?(user_ids)
+    if user_ids.blank?
+      render json: { errors: ["担当者を1人以上指定してください"] }, status: :unprocessable_entity
+      return false
+    end
+
+    unless @team.users.exists?(id: user_ids)
+      render json: { errors: ["有効な担当者（チームメンバー）を指定してください"] }, status: :unprocessable_entity
+      return false
+    end
+
+    unless @team.users.where(id: user_ids).count == user_ids.uniq.count
+      render json: { errors: ["指定された担当者の中に、チームメンバーではない人が含まれています"] }, status: :unprocessable_entity
+      return false
+    end
+
+    true
+  end
 
   def set_team
     @team = Team.find(params[:team_id])
@@ -60,6 +88,6 @@ class Api::V1::TasksController < ApplicationController
   end
 
   def task_params
-    params.require(:task).permit(:title, :content, :status, :due_date, :user_id)
+    params.require(:task).permit(:title, :content, :status, :deadline, user_ids: [])
   end
 end

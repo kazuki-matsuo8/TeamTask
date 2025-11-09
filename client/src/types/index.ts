@@ -18,6 +18,16 @@ export type LoginData = {
   password: string;
 };
 
+export type Message = {
+  id: number;
+  content: string;
+  user: {
+    id: number;
+    name: string;
+  };
+  created_at: string;
+};
+
 export type TeamData = {
   name: string;
   description?: string; 
@@ -40,7 +50,6 @@ export type Task = {
   content: string | null;
   deadline: string | null;
   status: TaskStatus;
-  user_id: number;
   team_id: number;
   created_at: string;
   updated_at: string;

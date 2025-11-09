@@ -17,6 +17,7 @@ import InviteMemberDrawer from "../components/InviteMemberDrawer";
 import type { Team, User } from "../types";
 import { getTeam, getTeamMembers } from "../api/team";
 import TaskBoard from "../components/TaskBoard";
+import Chat from "../components/Chat";
 
 const TeamPage = () => {
   const { teamId } = useParams<{ teamId: string }>();
@@ -107,7 +108,7 @@ const TeamPage = () => {
             </TabPanel>
             <TabPanel>
               <Box p={4}>
-                <p>ここにチームチャットのコンポーネント</p>
+                <Chat teamId={teamId!} />
               </Box>
             </TabPanel>
             <TabPanel>

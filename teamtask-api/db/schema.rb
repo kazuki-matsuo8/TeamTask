@@ -10,9 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_08_063009) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_08_174650) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "messages", force: :cascade do |t|
+    t.text "content"
+    t.bigint "team_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["team_id"], name: "index_messages_on_team_id"
+    t.index ["user_id"], name: "index_messages_on_user_id"
+  end
 
   create_table "task_assignments", force: :cascade do |t|
     t.bigint "task_id", null: false
@@ -58,6 +68,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_08_063009) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "messages", "teams"
+  add_foreign_key "messages", "users"
   add_foreign_key "task_assignments", "tasks"
   add_foreign_key "task_assignments", "users"
   add_foreign_key "tasks", "teams"

@@ -1,18 +1,35 @@
 class Api::V1::MembersController < ApplicationController
   before_action :authenticate
   before_action :set_team
-  before_action :authorize_member
+  before_action :authorize_member, except: [:create]
 
   def create
+    unless @team.users.include?(@current_user)
+      render json: { errors: ["チームメンバーのみが招待を行えます"] }, status: :forbidden
+      return
+    end
+    
     @user_to_invite = User.find(params[:user_id])
 
-    if @team.users.include?(@user_to_invite)
-      render json: { errors: ["ユーザーは既にチームに参加しています"] }, status: :unprocessable_entity
+    if @team.team_users.exists?(user_id: @user_to_invite.id)
+      render json: { errors: ["ユーザーは既に招待済み、またはチームに参加しています"] }, status: :unprocessable_entity
       return
     end
 
-    @team.users << @user_to_invite
-    render json: @user_to_invite, status: :created
+    @team_user = @team.team_users.build(user: @user_to_invite, status: :inviting) 
+    
+    if @team_user.save
+      render json: {
+        id: @team_user.id,
+        user_id: @team_user.user_id,
+        team_id: @team_user.team_id,
+        status: @team_user.status,
+        created_at: @team_user.created_at,
+        updated_at: @team_user.updated_at
+      }, status: :created
+    else
+      render json: { errors: @team_user.errors.full_messages }, status: :unprocessable_entity
+    end
   
   rescue ActiveRecord::RecordNotFound
     # ユーザーIDで見つからなかった場合のエラー
@@ -23,7 +40,8 @@ class Api::V1::MembersController < ApplicationController
   end
 
   def index
-  render json: @team.users, except: [:password_digest]
+    @members = @team.users.where(team_users: { status: :accepted })
+    render json: @members, except: [:password_digest]
   end
 
   private
@@ -35,8 +53,8 @@ class Api::V1::MembersController < ApplicationController
   end
 
   def authorize_member
-    unless @team.users.include?(@current_user)
-      render json: { errors: ["あなたはこのチームのメンバーではありません"] }, status: :forbidden # 403 Forbidden
+    unless @team.team_users.accepted.exists?(user_id: @current_user.id)
+      render json: { errors: ["あなたはこのチームのメンバーではありません"] }, status: :forbidden 
     end
   end
 end

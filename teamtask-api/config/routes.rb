@@ -9,6 +9,12 @@ Rails.application.routes.draw do
         resources :messages, only: [:index, :create]
       end
       post '/login', to: 'authentication#create'
+      resources :invitations, only: [] do
+        member do
+          patch :accept   
+          delete :reject  
+        end
+      end
     end
   end
 end

@@ -15,6 +15,7 @@ Rails.application.routes.draw do
           delete :reject  
         end
       end
+      resources :dashboard, only: [:index]
     end
   end
 end

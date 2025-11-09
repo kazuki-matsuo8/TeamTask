@@ -54,3 +54,19 @@ export type Task = {
   created_at: string;
   updated_at: string;
 };
+
+export type Invitation = {
+  invitation_id: number;
+  team: Team;
+};
+
+export type UpcomingTask = Task & {
+  users: User[];
+  team: Team;
+};
+
+export type DashboardData = {
+  pending_invitations: Invitation[];
+  my_teams: Team[];
+  upcoming_tasks: UpcomingTask[];
+};

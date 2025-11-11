@@ -8,6 +8,7 @@ import {
   Heading,
   VStack,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { FormControl, FormLabel } from "@chakra-ui/form-control";
 import { signUp } from "../api/auth";
@@ -19,6 +20,7 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [error, setError] = useState("");
+  const toast = useToast();
 
   const navigate = useNavigate();
 
@@ -47,7 +49,12 @@ const SignUp = () => {
     try {
       // APIを呼び出す
       await signUp(data);
-      alert("登録に成功しました");
+      toast({
+        title: "登録成功",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
       navigate("/");
     } catch (e) {
       if (e instanceof Error) {

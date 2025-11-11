@@ -7,6 +7,7 @@ import {
   Input,
   Text,
   Textarea,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
 import { useState } from "react";
@@ -18,6 +19,7 @@ const NewTeam = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
+  const toast = useToast();
 
   const navigate = useNavigate();
 
@@ -34,8 +36,12 @@ const NewTeam = () => {
 
     try {
       const createdTeam = await createTeam(data);
-
-      alert("チームが作成されました");
+      toast({
+        title: "チームが作成されました",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
       navigate(`/teams/${createdTeam.id}`);
     } catch (e) {
       if (e instanceof Error) {

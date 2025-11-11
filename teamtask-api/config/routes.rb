@@ -8,6 +8,8 @@ Rails.application.routes.draw do
         resources :tasks, only: [:index, :create, :update, :destroy]
         resources :messages, only: [:index, :create]
       end
+      # /api/v1/profile というURLで show, updateが使えるようになる
+      resource :profile, only: [:show, :update], controller: :users
       post '/login', to: 'authentication#create'
       resources :invitations, only: [] do
         member do

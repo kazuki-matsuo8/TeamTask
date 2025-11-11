@@ -4,7 +4,7 @@ Rails.application.routes.draw do
       resources :users, only: [:create, :index]
       resources :teams, only: [:create, :show] do
         # /api/v1/teams/:team_id/members
-        resources :members, only: [:create, :index]
+        resources :members, only: [:create, :index, :destroy]
         resources :tasks, only: [:index, :create, :update, :destroy]
         resources :messages, only: [:index, :create]
       end

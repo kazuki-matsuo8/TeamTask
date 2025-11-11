@@ -14,17 +14,18 @@ import {
   Text,
 } from "@chakra-ui/react";
 import InviteMemberDrawer from "../components/InviteMemberDrawer";
-import type { Team, User } from "../types";
+import type { Team, TeamMember } from "../types";
 import { getTeam, getTeamMembers } from "../api/team";
 import TaskBoard from "../components/TaskBoard";
 import Chat from "../components/Chat";
+import MemberManagement from "../components/MemberManagement";
 
 const TeamPage = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [team, setTeam] = useState<Team | null>(null);
-  const [members, setMembers] = useState<User[]>([]);
+  const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -113,7 +114,11 @@ const TeamPage = () => {
             </TabPanel>
             <TabPanel>
               <Box p={4}>
-                <p>ここにメンバー管理のコンポーネント</p>
+                <MemberManagement 
+                  teamId={teamId!}
+                  members={members}
+                  setMembers={setMembers}
+                />
               </Box>
             </TabPanel>
           </TabPanels>

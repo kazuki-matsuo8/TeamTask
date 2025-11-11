@@ -13,6 +13,11 @@ export type User = {
   updated_at: string;
 };
 
+export type TeamMember = User & {
+  team_user_id: number; 
+  role: "admin" | "member";
+};
+
 export type LoginData = {
   email: string;
   password: string;

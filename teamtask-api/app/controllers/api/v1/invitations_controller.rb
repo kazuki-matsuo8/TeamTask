@@ -3,7 +3,7 @@ class Api::V1::InvitationsController < ApplicationController
   before_action :set_invitation
 
   def accept
-    if @invitation.accepted! 
+    if @invitation.update(status: :accepted, role: :member)
       render json: @invitation.team, status: :ok
     else
       render json: { errors: @invitation.errors.full_messages }, status: :unprocessable_entity

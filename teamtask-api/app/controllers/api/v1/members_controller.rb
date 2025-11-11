@@ -40,8 +40,34 @@ class Api::V1::MembersController < ApplicationController
   end
 
   def index
-    @members = @team.users.where(team_users: { status: :accepted })
-    render json: @members, except: [:password_digest]
+    @team_users = @team.team_users.accepted.includes(:user)
+    
+    @members_data = @team_users.map do |team_user|
+      {
+        id: team_user.user.id, 
+        name: team_user.user.name,
+        email: team_user.user.email,
+        team_user_id: team_user.id, 
+        role: team_user.role        
+      }
+    end
+    
+    render json: @members_data
+  end
+
+  def destroy
+    @team_user_to_delete = @team.team_users.find(params[:id])
+    if @team_user_to_delete.admin?
+       render json: { errors: ["管理者はチームから削除できません。"] }, status: :forbidden
+       return
+    end
+    if @team_user_to_delete.destroy
+      head :no_content 
+    else
+      render json: { errors: ["メンバーの削除に失敗しました"] }, status: :unprocessable_entity
+    end
+  rescue ActiveRecord::RecordNotFound
+    render json: { errors: ["削除対象のメンバーが見つかりません"] }, status: :not_found
   end
 
   private

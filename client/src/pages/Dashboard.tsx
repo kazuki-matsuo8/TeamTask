@@ -24,6 +24,7 @@ import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { fetchDashboardData } from "../api/dashboard";
 import { acceptInvitation, rejectInvitation } from "../api/invitation";
 import type { DashboardData, Invitation, UpcomingTask, Team } from "../types";
+import AppHeader from "../components/AppHeader";
 
 const EmptyState: React.FC<{ message: string }> = ({ message }) => (
   <Box
@@ -146,19 +147,12 @@ const Dashboard = () => {
   }
 
   return (
-    <Container maxW="container.xl" py={8}>
-      <HStack
-        justifyContent="space-between"
-        pb={4}
-        mb={8}
-        borderBottomWidth="1px"
-        borderColor="gray.200"
-      >
-        <Heading>TeamTask</Heading>
+    <Container maxW="container.xl">
+      <AppHeader title="TeamTask">
         <Button as={RouterLink} to="/teams/new" colorScheme="blue">
           新しいチームを作成する
         </Button>
-      </HStack>
+      </AppHeader>
 
       {dashboardData?.pending_invitations &&
         dashboardData.pending_invitations.length > 0 && (
@@ -180,7 +174,7 @@ const Dashboard = () => {
         )}
 
       <Box as="section" mb={10}>
-        <Heading size="lg" mb={5}>
+        <Heading size="md" mb={5}>
           所属チーム
         </Heading>
         {dashboardData?.my_teams && dashboardData.my_teams.length > 0 ? (
@@ -195,7 +189,7 @@ const Dashboard = () => {
       </Box>
 
       <Box as="section">
-        <Heading size="lg" mb={5}>
+        <Heading size="md" mb={5}>
           近日締切のタスク (3日以内)
         </Heading>
         {dashboardData?.upcoming_tasks &&
@@ -271,7 +265,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
       to={`/teams/${team.id}`}
       _hover={{ boxShadow: "xl", transform: "translateY(-3px)" }}
       transition="all 0.2s ease-in-out"
-      boxShadow="md" 
+      boxShadow="md"
       borderRadius="md"
       variant="outline"
     >
@@ -304,7 +298,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
       to={`/teams/${task.team_id}`}
       _hover={{ boxShadow: "xl", transform: "translateY(-3px)" }}
       transition="all 0.2s ease-in-out"
-      boxShadow="md" 
+      boxShadow="md"
       borderRadius="md"
       variant="outline"
     >

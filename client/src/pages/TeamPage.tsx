@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Box,
-  Heading,
   Button,
   useDisclosure,
   Tabs,
@@ -12,6 +11,7 @@ import {
   TabPanel,
   Spinner,
   Text,
+  Container,
 } from "@chakra-ui/react";
 import InviteMemberDrawer from "../components/InviteMemberDrawer";
 import type { Team, TeamMember } from "../types";
@@ -19,6 +19,7 @@ import { getTeam, getTeamMembers } from "../api/team";
 import TaskBoard from "../components/TaskBoard";
 import Chat from "../components/Chat";
 import MemberManagement from "../components/MemberManagement";
+import AppHeader from "../components/AppHeader";
 
 const TeamPage = () => {
   const { teamId } = useParams<{ teamId: string }>();
@@ -75,18 +76,12 @@ const TeamPage = () => {
   }
 
   return (
-    <Box p={8}>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={6}
-      >
-        <Heading>{team?.name}</Heading>
+    <Container maxW="container.xl">
+      <AppHeader title={team?.name || "チーム読み込み中..."}>
         <Button colorScheme="blue" onClick={onOpen}>
           ＋ メンバーを招待
         </Button>
-      </Box>
+      </AppHeader>
 
       <Box as="section">
         <Tabs>
@@ -114,7 +109,7 @@ const TeamPage = () => {
             </TabPanel>
             <TabPanel>
               <Box p={4}>
-                <MemberManagement 
+                <MemberManagement
                   teamId={teamId!}
                   members={members}
                   setMembers={setMembers}
@@ -132,7 +127,7 @@ const TeamPage = () => {
         teamId={teamId!}
         currentMembers={members}
       />
-    </Box>
+    </Container>
   );
 };
 

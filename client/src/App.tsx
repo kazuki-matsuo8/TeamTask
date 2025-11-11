@@ -4,16 +4,20 @@ import Login from "./pages/Login";
 import NewTeam from "./pages/NewTeam";
 import TeamPage from "./pages/TeamPage";
 import Dashboard from "./pages/Dashboard";
+import PrivateRoute from "./components/PrivateRoute";
+
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/teams/new" element={<NewTeam />} />
-        <Route path="/teams/:teamId" element={<TeamPage />} />
+        <Route element={<PrivateRoute />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/teams/new" element={<NewTeam />} />
+          <Route path="/teams/:teamId" element={<TeamPage />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

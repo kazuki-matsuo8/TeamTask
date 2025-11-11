@@ -19,7 +19,7 @@ import {
   Spacer,
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { fetchDashboardData } from "../api/dashboard";
 import type { Team } from "../types";
 type SideMenuDrawerProps = {
@@ -55,13 +55,22 @@ const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({
         <DrawerBody>
           <VStack align="stretch" spacing={4}>
             <Button
-              as={RouterLink}
+              as={Link}
               to="/"
               onClick={onClose}
               variant="ghost"
               justifyContent="flex-start"
             >
               ダッシュボード
+            </Button>
+            <Button
+              as={Link}
+              to="/profile"
+              onClick={onClose}
+              variant="ghost"
+              justifyContent="flex-start"
+            >
+              プロフィール設定
             </Button>
             <Divider />
             <Text fontWeight="bold" fontSize="lg">
@@ -74,7 +83,7 @@ const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({
                 {myTeams.map((team) => (
                   <Button
                     key={team.id}
-                    as={RouterLink}
+                    as={Link}
                     to={`/teams/${team.id}`}
                     onClick={onClose}
                     variant="ghost"
@@ -86,7 +95,7 @@ const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({
               </VStack>
             )}
             <Button
-              as={RouterLink}
+              as={Link}
               to="/teams/new"
               onClick={onClose}
               colorScheme="blue"

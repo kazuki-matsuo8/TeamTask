@@ -5,7 +5,7 @@ import NewTeam from "./pages/NewTeam";
 import TeamPage from "./pages/TeamPage";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
-
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -17,6 +17,7 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/teams/new" element={<NewTeam />} />
           <Route path="/teams/:teamId" element={<TeamPage />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,4 +1,4 @@
-import type { TeamData, Team, User } from '../types';
+import type { TeamData, Team, User, TeamMember } from '../types';
 
 export const createTeam = async (teamData: TeamData): Promise<Team> => {
   const token = localStorage.getItem("token");
@@ -92,7 +92,7 @@ export const getTeam = async (teamId: string): Promise<Team> => {
 };
 
 
-export const getTeamMembers = async (teamId: string): Promise<User[]> => {
+export const getTeamMembers = async (teamId: string): Promise<TeamMember[]> => {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("認証トークンが見つかりません");
 
@@ -110,8 +110,33 @@ export const getTeamMembers = async (teamId: string): Promise<User[]> => {
       const message = errorData.errors.join("\n");
       throw new Error(message || 'メンバー一覧の取得に失敗しました');
     }
-    const data: User[] = await response.json();
+    const data: TeamMember[] = await response.json();
     return data;
+
+  } catch (error) {
+    console.error('API呼び出しエラー:', error);
+    throw error;
+  }
+};
+
+export const removeMemberFromTeam = async (teamId: string, teamUserId: number): Promise<void> => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("認証トークンが見つかりません");
+
+  try {
+    const response = await fetch(`http://127.0.0.1:3000/api/v1/teams/${teamId}/members/${teamUserId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const message = errorData.errors.join("\n");
+      throw new Error(message || 'メンバーの削除に失敗しました');
+    }
+    return;
 
   } catch (error) {
     console.error('API呼び出しエラー:', error);

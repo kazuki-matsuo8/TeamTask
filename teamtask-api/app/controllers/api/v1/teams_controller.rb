@@ -4,10 +4,21 @@ class Api::V1::TeamsController < ApplicationController
   before_action :authorize_member, only: [:show]
 
   def create
-    @team = @current_user.teams.build(team_params)
+    @team = Team.new(team_params)
 
     if @team.save
-      render json: @team, status: :created
+      @team_user = @team.team_users.build(
+        user: @current_user,
+        status: :accepted,
+        role: :admin       
+      )
+      if @team_user.save
+        render json: @team, status: :created
+      else
+        # 作成したチームを削除して、処理を元に戻す。
+        @team.destroy
+        render json: { errors: @team_user.errors.full_messages }, status: :unprocessable_entity
+      end
     else
       render json: { errors: @team.errors.full_messages }, status: :unprocessable_entity
     end

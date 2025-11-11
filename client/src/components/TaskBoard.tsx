@@ -8,9 +8,15 @@ import {
   Button,
   useDisclosure,
   SimpleGrid,
+  HStack,
+  Spacer,
+  Tag,
+  IconButton,
+  useToast,
 } from "@chakra-ui/react";
-import { getTasks } from "../api/task";
-import type { Task, User } from "../types";
+import { ArrowRightIcon } from "@chakra-ui/icons";
+import { getTasks, updateTask } from "../api/task";
+import type { Task, User, TaskStatus } from "../types";
 import CreateTaskModal from "./CreateTaskModal";
 import TaskDetailsModal from "./TaskDetailsModal";
 
@@ -37,13 +43,14 @@ const TaskBoard: React.FC<Props> = ({ teamId, members }) => {
   } = useDisclosure();
 
   const [selectedTask, setSelectedTask] = useState<TaskWithUser | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
         setLoading(true);
-        const tasksData = await getTasks(teamId); 
-        setTasks(tasksData); 
+        const tasksData = await getTasks(teamId);
+        setTasks(tasksData);
       } catch (e) {
         if (e instanceof Error) setError(e.message);
       } finally {
@@ -52,6 +59,43 @@ const TaskBoard: React.FC<Props> = ({ teamId, members }) => {
     };
     fetchTasks();
   }, [teamId]);
+
+  const handleUpdateStatus = async (
+    taskToUpdate: TaskWithUser,
+    newStatus: TaskStatus
+  ) => {
+    try {
+      const updatedTaskData = await updateTask(teamId, taskToUpdate.id, {
+        status: newStatus,
+      });
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === updatedTaskData.id
+            ? { ...task, ...updatedTaskData }
+            : task
+        )
+      );
+
+      toast({
+        title: `タスク「${updatedTaskData.title}」を「${
+          newStatus === "inprogress" ? "作業中" : "完了"
+        }」に移動しました。`,
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        toast({
+          title: "ステータスの更新に失敗しました",
+          description: e.message,
+          status: "error",
+          duration: 4000,
+          isClosable: true,
+        });
+      }
+    }
+  };
 
   const getApiStatus = (displayStatus: string): Task["status"] => {
     const reverseMap: Record<string, Task["status"]> = {
@@ -98,16 +142,22 @@ const TaskBoard: React.FC<Props> = ({ teamId, members }) => {
           title="未着手"
           tasks={todoTasks}
           onTaskClick={handleTaskClick}
+          onUpdateTaskStatus={handleUpdateStatus}
+          nextStatus="inprogress"
         />
         <TaskColumn
           title="作業中"
           tasks={inprogressTasks}
           onTaskClick={handleTaskClick}
+          onUpdateTaskStatus={handleUpdateStatus}
+          nextStatus="done"
         />
         <TaskColumn
           title="完了"
           tasks={doneTasks}
           onTaskClick={handleTaskClick}
+          onUpdateTaskStatus={handleUpdateStatus}
+          nextStatus={null}
         />
       </SimpleGrid>
 
@@ -130,18 +180,48 @@ const TaskBoard: React.FC<Props> = ({ teamId, members }) => {
   );
 };
 
-// --- カラム表示用のサブコンポーネント ---
 type TaskColumnProps = {
   title: string;
   tasks: TaskWithUser[];
   onTaskClick: (task: TaskWithUser) => void;
+  onUpdateTaskStatus: (task: TaskWithUser, newStatus: TaskStatus) => void;
+  nextStatus: TaskStatus | null;
 };
 
 const TaskColumn: React.FC<TaskColumnProps> = ({
   title,
   tasks,
   onTaskClick,
+  onUpdateTaskStatus,
+  nextStatus,
 }) => {
+  const handleNextStatusClick = (e: React.MouseEvent, task: TaskWithUser) => {
+    e.stopPropagation();
+    if (nextStatus) {
+      onUpdateTaskStatus(task, nextStatus);
+    }
+  };
+
+  const formatDeadline = (deadline: string | null) => {
+    if (!deadline) {
+      return <Tag size="sm">期日未設定</Tag>;
+    }
+
+    try {
+      const date = new Date(deadline);
+      if (isNaN(date.getTime())) {
+        return <Tag size="sm">期日不明</Tag>;
+      }
+      return (
+        <Tag size="sm" colorScheme="gray">
+          {date.toLocaleDateString()}
+        </Tag>
+      );
+    } catch {
+      return <Tag size="sm">期日不明</Tag>;
+    }
+  };
+
   return (
     <Box bg="gray.100" p={4} borderRadius="md" w="100%" minH="500px">
       <Heading size="md" mb={4}>
@@ -160,13 +240,34 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
             cursor="pointer"
             _hover={{ bg: "gray.50" }}
           >
-            <Text fontWeight="bold">{task.title}</Text>
-            <Text fontSize="sm" color="gray.500">
-              担当:{" "}
-              {task.users && task.users.length > 0
-                ? task.users.map((u) => u.name).join(", ")
-                : "未割り当て"}
-            </Text>
+            <HStack justify="space-between" mb={2}>
+              <Text fontWeight="bold" noOfLines={2} flex="1">
+                {task.title}
+              </Text>
+
+              {nextStatus && (
+                <IconButton
+                  aria-label="次のステータスへ"
+                  icon={<ArrowRightIcon />}
+                  size="xs"
+                  variant="ghost"
+                  colorScheme="blue"
+                  onClick={(e) => handleNextStatusClick(e, task)}
+                  ml={2}
+                />
+              )}
+            </HStack>
+
+            <HStack mb={2} spacing={3}>
+              <Text fontSize="sm" color="gray.500" noOfLines={1}>
+                担当:{" "}
+                {task.users && task.users.length > 0
+                  ? task.users.map((u) => u.name).join(", ")
+                  : "未割り当て"}
+              </Text>
+              <Spacer />
+              {formatDeadline(task.deadline)}
+            </HStack>
           </Box>
         ))}
       </VStack>

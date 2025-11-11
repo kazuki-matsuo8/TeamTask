@@ -6,6 +6,7 @@ import {
   Input,
   VStack,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +18,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const toast = useToast();
 
   const navigate = useNavigate();
 
@@ -36,7 +38,12 @@ const Login = () => {
       const response = await login(data);
       // 受け取ったJWTをローカルストレージに保存
       localStorage.setItem("token", response.token);
-      alert("ログインに成功しました");
+      toast({
+        title: "ログイン成功",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
       navigate("/");
     } catch (e) {
       if (e instanceof Error) {

@@ -219,7 +219,12 @@ const InvitationCard: React.FC<InvitationCardProps> = ({
   onReject,
 }) => {
   return (
-    <Alert status="info" variant="left-accent" borderRadius="md" boxShadow="md">
+    <Alert
+      status="warning"
+      variant="left-accent"
+      borderRadius="md"
+      boxShadow="md"
+    >
       <VStack align="start" flex="1">
         <AlertTitle>チーム「{invitation.team.name}」への招待</AlertTitle>
         <AlertDescription>
@@ -235,7 +240,6 @@ const InvitationCard: React.FC<InvitationCardProps> = ({
           </Button>
           <Button
             colorScheme="red"
-            variant="outline"
             size="sm"
             onClick={() => onReject(invitation.invitation_id)}
           >

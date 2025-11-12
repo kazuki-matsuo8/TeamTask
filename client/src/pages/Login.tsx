@@ -7,9 +7,10 @@ import {
   VStack,
   Text,
   useToast,
+  Link as ChakraLink,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FormControl, FormLabel } from "@chakra-ui/form-control";
 import { login } from "../api/auth";
 import type { LoginData } from "../types";
@@ -115,6 +116,17 @@ const Login = () => {
             >
               ログイン
             </Button>
+            <Text fontSize="sm" color="gray.600">
+              アカウントをお持ちでないですか？{" "}
+              <ChakraLink
+                as={Link}
+                to="/signup"
+                color="blue.500"
+                fontWeight="bold"
+              >
+                新規登録はこちら
+              </ChakraLink>
+            </Text>
           </VStack>
         </form>
       </Box>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Container,
   Box,
@@ -9,6 +9,7 @@ import {
   VStack,
   Text,
   useToast,
+  Link as ChakraLink,
 } from "@chakra-ui/react";
 import { FormControl, FormLabel } from "@chakra-ui/form-control";
 import { signUp } from "../api/auth";
@@ -48,7 +49,8 @@ const SignUp = () => {
 
     try {
       // APIを呼び出す
-      await signUp(data);
+      const response = await signUp(data);
+      localStorage.setItem("token", response.token);
       toast({
         title: "登録成功",
         status: "success",
@@ -156,6 +158,17 @@ const SignUp = () => {
             >
               登録する
             </Button>
+            <Text fontSize="sm" color="gray.600">
+              アカウントを既にお持ちですか？{" "}
+              <ChakraLink
+                as={Link}
+                to="/login"
+                color="blue.500"
+                fontWeight="bold"
+              >
+                ログインはこちら
+              </ChakraLink>
+            </Text>
           </VStack>
         </form>
       </Box>
